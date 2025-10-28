@@ -27,6 +27,7 @@ resource "azurerm_linux_function_app" "function_app" {
   
   https_only                    = var.https_only
   public_network_access_enabled = var.public_network_access_enabled
+  virtual_network_subnet_id     = var.virtual_network_subnet_id
   
   # App Settings
   app_settings = merge(
@@ -39,11 +40,11 @@ resource "azurerm_linux_function_app" "function_app" {
   )
 
   site_config {
-    always_on                              = var.always_on
-    ftps_state                             = var.ftps_state
-    http2_enabled                          = var.http2_enabled
-    minimum_tls_version                    = var.minimum_tls_version
-    vnet_route_all_enabled                 = var.vnet_route_all_enabled
+    always_on                  = var.always_on
+    ftps_state                 = var.ftps_state
+    http2_enabled              = var.http2_enabled
+    minimum_tls_version        = var.minimum_tls_version
+    vnet_route_all_enabled     = var.vnet_route_all_enabled
     
     # Python Application Stack
     application_stack {
@@ -77,14 +78,10 @@ resource "azurerm_linux_function_app" "function_app" {
     identity_ids = var.identity_type == "UserAssigned" || var.identity_type == "SystemAssigned, UserAssigned" ? var.identity_ids : null
   }
 
-  # VNet Integration
-  virtual_network_subnet_id = var.virtual_network_subnet_id
-
   tags = var.tags
 
   depends_on = [azurerm_service_plan.service_plan]
 }
-
 # Private Endpoint for Function App
 resource "azurerm_private_endpoint" "function_app_endpoint" {
   count               = var.enable_private_endpoint ? 1 : 0
