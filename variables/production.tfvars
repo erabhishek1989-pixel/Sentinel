@@ -101,28 +101,45 @@ virtual_networks = {
 }
 
 sentinel_connectors = {
-  "connectors-uksouth" = {
+  "log-core-security-sentinel-uksouth-0001" = {
     workspace_key = "log-core-security-sentinel-uksouth-0001"
     connectors = {
-      "mimecast" = {
+      "azuread" = {
+        app_settings = {
+          "AZURE_TENANT_ID" = "fb973a23-5188-45ab-b4fb-277919443584"
+        }
+        request_config = {
+          method           = "GET"
+          endpoint         = "https://graph.microsoft.com/v1.0/auditLogs/directoryAudits"
+          headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
+          query_parameters = {}
+        }
         polling_interval = "PT10M"
+      }
+      "mimecast" = {
+        app_settings = {
+          "MIMECAST_BASE_URL" = "https://api.mimecast.com"
+        }
         request_config = {
           method           = "GET"
           endpoint         = "https://api.mimecast.com/your-endpoint"
           headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
           query_parameters = {}
         }
+        polling_interval = "PT10M"
       }
       "cyberark" = {
-        polling_interval = "PT10M"
+        app_settings = {
+          "CYBERARK_BASE_URL" = "https://your-cyberark-endpoint.com"
+        }
         request_config = {
           method           = "GET"
           endpoint         = "https://your-cyberark-endpoint.com/api"
           headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
           query_parameters = {}
         }
+        polling_interval = "PT10M"
       }
-      ##Need to add code to ensure Azure AD is connected
     }
   }
 }

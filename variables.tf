@@ -51,10 +51,6 @@ variable "sentinel_workspace" {
     name     = string
     location = string
     sku      = string
-    connectors = optional(map(object({
-      enabled      = bool
-      app_settings = optional(map(string), {})
-    })), {})
   }))
   default = {}
 }

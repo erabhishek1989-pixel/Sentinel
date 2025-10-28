@@ -144,13 +144,13 @@ module "sentinel_workspace" {
   environment_identifier = var.environment_identifier
   resource_group_name    = each.value.location == "UK South" ? module.resource_groups["rg-core-security-uksouth-0001"].resource_group_name : module.resource_groups["rg-core-security-ukwest-0001"].resource_group_name
   tenant_id              = var.tenant_id
-  connectors             = lookup(each.value, "connectors", {})
   tags                   = merge(local.common_tags, local.extra_tags)
 
   depends_on = [module.resource_groups]
 }
 
 #--------------- Azure Virtual Desktop ---------------#
+
 
 module "azure_virtual_desktop" {
   source = "./modules/azure_virtual_desktop"
@@ -185,13 +185,108 @@ module "azure_virtual_desktop" {
   image_version                          = each.value.image_version
   license_type                           = each.value.license_type
   tags                                   = merge(local.common_tags, local.extra_tags)
-  #virtual_machine_scale_set              = each.value.virtual_machine_scale_set
-  #storage_account                        = each.value.storage_account
+
   depends_on = [module.virtual_networks]
 }
 
+#--------------- Sentinel Connector Storage Accounts ---------------#
 
+# Storage Accounts for Sentinel Connectors
+module "sentinel_connector_storage_accounts" {
+  source   = "./modules/storage_account"
+  for_each = var.sentinel_connectors
 
+  name                            = "${var.environment_identifier}stsentcon${replace(lower(each.key), "-", "")}"
+  resource_group_name             = each.value.workspace_key == "log-core-security-sentinel-uksouth-0001" ? module.resource_groups["rg-core-security-uksouth-0001"].resource_group_name : module.resource_groups["rg-core-security-ukwest-0001"].resource_group_name
+  location                        = each.value.workspace_key == "log-core-security-sentinel-uksouth-0001" ? "UK South" : "UK West"
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  account_kind                    = "StorageV2"
+  access_tier                     = "Hot"
+  enable_https_traffic_only       = true
+  min_tls_version                 = "TLS1_2"
+  allow_nested_items_to_be_public = false
+  shared_access_key_enabled       = true
+  public_network_access_enabled   = false
+  
+  network_rules = null
+  blob_properties = null
+  identity_type = "SystemAssigned"
+  containers    = {}
+  file_shares   = {}
+  tables        = {}
+  queues        = {}
+  
+  enable_blob_private_endpoint = false
+  
+  tags = local.tags
+
+  depends_on = [module.resource_groups, module.sentinel_workspace]
+}
+
+#--------------- Sentinel Connector Function Apps ---------------#
+
+# Flatten the connectors structure for easier iteration
+locals {
+  sentinel_connector_functions = flatten([
+    for workspace_key, workspace_config in var.sentinel_connectors : [
+      for connector_key, connector_config in workspace_config.connectors : {
+        key           = "${workspace_key}-${connector_key}"
+        workspace_key = workspace_key
+        connector_key = connector_key
+        config        = connector_config
+      }
+    ]
+  ])
+  
+  sentinel_connector_functions_map = {
+    for item in local.sentinel_connector_functions : item.key => item
+  }
+}
+
+# Function Apps for Sentinel Connectors
+module "sentinel_connector_function_apps" {
+  source   = "./modules/function_app"
+  for_each = local.sentinel_connector_functions_map
+
+  environment_identifier        = var.environment_identifier
+  name                          = "sentinel-${each.value.connector_key}"
+  resource_group_name           = each.value.workspace_key == "log-core-security-sentinel-uksouth-0001" ? module.resource_groups["rg-core-security-uksouth-0001"].resource_group_name : module.resource_groups["rg-core-security-ukwest-0001"].resource_group_name
+  location                      = each.value.workspace_key == "log-core-security-sentinel-uksouth-0001" ? "UK South" : "UK West"
+  sku_name                      = "Y1" # Consumption plan
+  storage_account_name          = module.sentinel_connector_storage_accounts[each.value.workspace_key].storage_account_name
+  storage_account_access_key    = module.sentinel_connector_storage_accounts[each.value.workspace_key].primary_access_key
+  python_version                = "3.11"
+  
+  https_only                    = true
+  public_network_access_enabled = true
+  always_on                     = false
+  
+  app_settings = merge(
+    {
+      "FUNCTIONS_EXTENSION_VERSION" = "~4"
+      "WORKSPACE_ID"                = module.sentinel_workspace[each.value.workspace_key].workspace_id
+      "WORKSPACE_KEY"               = module.sentinel_workspace[each.value.workspace_key].log_analytics_workspace.primary_shared_key
+    },
+    lookup(each.value.config, "app_settings", {})
+  )
+  
+  ftps_state                = "Disabled"
+  http2_enabled             = true
+  minimum_tls_version       = "1.2"
+  vnet_route_all_enabled    = false
+  virtual_network_subnet_id = null
+  identity_type             = "SystemAssigned"
+  enable_private_endpoint   = false
+  
+  tags = local.tags
+  
+  depends_on = [module.sentinel_connector_storage_accounts, module.sentinel_workspace]
+}
+
+#--------------- Sentinel Data Connectors ---------------#
+
+# Sentinel Data Connectors
 module "sentinel_connectors" {
   source = "./modules/sentinel_connectors"
 
@@ -200,8 +295,11 @@ module "sentinel_connectors" {
   log_analytics_workspace_id = module.sentinel_workspace[each.value.workspace_key].log_analytics_workspace_id
   connectors                 = each.value.connectors
 
-  depends_on = [module.sentinel_workspace]
+  depends_on = [module.sentinel_workspace, module.sentinel_connector_function_apps]
 }
+
+#--------------- Storage Accounts (Original) ---------------#
+
 # Storage Accounts Module
 module "storage_accounts" {
   source = "./modules/storage_account"
@@ -232,6 +330,8 @@ module "storage_accounts" {
   
   tags = local.tags
 }
+
+#--------------- Function Apps (Original) ---------------#
 
 # Function Apps Module
 module "function_apps" {
