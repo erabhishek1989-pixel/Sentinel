@@ -11,6 +11,4 @@ output "log_analytics_workspace" {
 output "workspace_id" {
   description = "Workspace ID (GUID)"
   value       = azurerm_log_analytics_workspace.log_analytics_workspace.workspace_id
-}
-
-
+} 

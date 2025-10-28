@@ -102,13 +102,9 @@ virtual_networks = {
 
 sentinel_connectors = {
   "log-core-security-sentinel-uksouth-0001" = {
-    storage_account_name = "y3stsentconuks001"
     workspace_key = "log-core-security-sentinel-uksouth-0001"
     connectors = {
       "azuread" = {
-        app_settings = {
-          "AZURE_TENANT_ID" = "fb973a23-5188-45ab-b4fb-277919443584"
-        }
         request_config = {
           method           = "GET"
           endpoint         = "https://graph.microsoft.com/v1.0/auditLogs/directoryAudits"
@@ -118,9 +114,6 @@ sentinel_connectors = {
         polling_interval = "PT10M"
       }
       "mimecast" = {
-        app_settings = {
-          "MIMECAST_BASE_URL" = "https://api.mimecast.com"
-        }
         request_config = {
           method           = "GET"
           endpoint         = "https://api.mimecast.com/your-endpoint"
@@ -130,9 +123,6 @@ sentinel_connectors = {
         polling_interval = "PT10M"
       }
       "cyberark" = {
-        app_settings = {
-          "CYBERARK_BASE_URL" = "https://your-cyberark-endpoint.com"
-        }
         request_config = {
           method           = "GET"
           endpoint         = "https://your-cyberark-endpoint.com/api"
@@ -156,7 +146,7 @@ storage_accounts = {
     access_tier              = "Hot"
     
     # Security Settings
-    enable_https_traffic_only       = true
+    https_traffic_only_enabled      = true
     min_tls_version                 = "TLS1_2"
     allow_nested_items_to_be_public = false
     shared_access_key_enabled       = true

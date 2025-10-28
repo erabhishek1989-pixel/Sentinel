@@ -2,6 +2,7 @@
 variable "sentinel_connectors" {
   description = "Sentinel connectors configuration per workspace"
   type = map(object({
+    storage_account_name = optional(string)
     workspace_key = string
     connectors = map(object({
       request_config = optional(object({
@@ -11,6 +12,7 @@ variable "sentinel_connectors" {
         query_parameters = map(string)
       }))
       polling_interval = optional(string, "PT10M")
+      app_settings     = optional(map(string), {}) 
     }))
   }))
   default = {}
@@ -99,8 +101,54 @@ variable "function_apps" {
 
 variable "storage_accounts" {
   description = "Map of Storage Accounts configuration"
-  type        = any
-  default     = {}
+  type = map(object({
+    name                            = string
+    location                        = string
+    account_tier                    = string
+    account_replication_type        = string
+    account_kind                    = string
+    access_tier                     = string
+    enable_https_traffic_only       = bool
+    min_tls_version                 = string
+    allow_nested_items_to_be_public = bool
+    shared_access_key_enabled       = bool
+    public_network_access_enabled   = bool
+    network_rules = optional(object({
+      default_action             = string
+      bypass                     = list(string)
+      ip_rules                   = list(string)
+      virtual_network_subnet_ids = list(string)
+    }))
+    blob_properties = optional(object({
+      versioning_enabled              = bool
+      change_feed_enabled             = bool
+      last_access_time_enabled        = bool
+      delete_retention_days           = number
+      container_delete_retention_days = number
+    }))
+    identity_type = string
+    containers = map(object({
+      name                  = string
+      container_access_type = string
+    }))
+    file_shares = map(object({
+      name             = string
+      quota            = number
+      enabled_protocol = string
+      access_tier      = string
+    }))
+    tables = map(object({
+      name = string
+    }))
+    queues = map(object({
+      name = string
+    }))
+    enable_blob_private_endpoint  = bool
+    enable_file_private_endpoint  = optional(bool, false)
+    enable_table_private_endpoint = optional(bool, false)
+    enable_queue_private_endpoint = optional(bool, false)
+  }))
+  default = {}
 }
 variable "virtual_networks" {
   description = "Map of virtual networks configuration"

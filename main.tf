@@ -196,7 +196,10 @@ module "sentinel_connector_storage_accounts" {
   source   = "./modules/storage_account"
   for_each = var.sentinel_connectors
 
-  name                            = "${var.environment_identifier}stsentcon${replace(lower(each.key), "-", "")}"
+  name = coalesce(
+    each.value.storage_account_name,
+    "${var.environment_identifier}stsc${substr(md5(each.key), 0, 12)}"
+  )
   resource_group_name             = each.value.workspace_key == "log-core-security-sentinel-uksouth-0001" ? module.resource_groups["rg-core-security-uksouth-0001"].resource_group_name : module.resource_groups["rg-core-security-ukwest-0001"].resource_group_name
   location                        = each.value.workspace_key == "log-core-security-sentinel-uksouth-0001" ? "UK South" : "UK West"
   account_tier                    = "Standard"

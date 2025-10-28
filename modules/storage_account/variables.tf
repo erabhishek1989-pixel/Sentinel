@@ -37,7 +37,7 @@ variable "access_tier" {
   default     = "Hot"
 }
 
-variable "enable_https_traffic_only" {
+variable "https_traffic_only_enabled" {
   description = "Enable HTTPS traffic only"
   type        = bool
   default     = true
