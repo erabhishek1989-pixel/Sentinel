@@ -177,3 +177,8 @@ variable "storage_accounts" {
   type        = any
   default     = {}
 }
+variable "virtual_networks" {
+  description = "Map of virtual networks configuration"
+  type        = any
+  default     = {}
+}

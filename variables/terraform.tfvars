@@ -24,13 +24,6 @@ sentinel_workspace = {
   }
 }
 
-sentinel_connectors = {
-  "azure_active_directory" = {
-    enabled = true
-  }
-}
-
-
 #azure_virtual_desktop = {
 #  "avd-core-security-uksouth-0001" = {
 #    name                                   = "avd-core-security-uksouth-0001"

@@ -84,6 +84,7 @@ locals {
 
   extra_tags = {
   }
+  tags = merge(local.common_tags, local.extra_tags)
 }
 
 #--------------- DEPLOYMENT ---------------#
@@ -142,6 +143,7 @@ module "sentinel_workspace" {
   sku                    = each.value.sku
   environment_identifier = var.environment_identifier
   resource_group_name    = each.value.location == "UK South" ? module.resource_groups["rg-core-security-uksouth-0001"].resource_group_name : module.resource_groups["rg-core-security-ukwest-0001"].resource_group_name
+  tenant_id              = var.tenant_id
   tags                   = merge(local.common_tags, local.extra_tags)
 
   depends_on = [module.resource_groups]
@@ -187,23 +189,6 @@ module "azure_virtual_desktop" {
   depends_on = [module.virtual_networks]
 }
 
-
-resource "azurerm_storage_account" "storage_account" {
-  name                     = var.name
-  resource_group_name      = var.resource_group_name
-  location                 = var.location
-  account_tier             = var.account_tier
-  account_replication_type = var.account_replication_type
-  account_kind             = var.account_kind
-  min_tls_version          = var.min_tls_version
-  
-  enable_https_traffic_only       = var.enable_https_traffic_only
-  public_network_access_enabled   = var.public_network_access_enabled
-  allow_nested_items_to_be_public = var.allow_nested_items_to_be_public
-
-  tags = var.tags
-}
-
 resource "azurerm_storage_account_network_rules" "network_rules" {
   count = var.network_rules != null ? 1 : 0
 
@@ -215,18 +200,6 @@ resource "azurerm_storage_account_network_rules" "network_rules" {
   bypass                     = try(var.network_rules.bypass, ["AzureServices"])
 }
 
-module "sentinel_workspace" {
-  source = "./modules/sentinel_workspace"
-  
-  for_each                 = var.sentinel_workspace
-  name                     = each.value.name
-  environment_identifier   = var.environment_identifier
-  location                 = each.value.location
-  resource_group_name      = module.resource_groups["rg-core-security-${each.value.location == "UK South" ? "uksouth" : "ukwest"}-0001"].resource_group_name
-  sku                      = each.value.sku
-  tenant_id                = var.tenant_id
-  tags                     = local.tags
-}
 module "sentinel_connectors" {
   source = "./modules/sentinel_connectors"
 
