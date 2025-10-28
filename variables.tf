@@ -1,114 +1,92 @@
-variable "environment" {
-  type = string
+variable "name" {
+  description = "Name of the storage account"
+  type        = string
 }
 
-variable "resource_groups_map" {
+variable "resource_group_name" {
+  description = "Name of the resource group"
+  type        = string
+}
+
+variable "location" {
+  description = "Azure region location"
+  type        = string
+}
+
+variable "account_tier" {
+  description = "Storage account tier"
+  type        = string
+  default     = "Standard"
+}
+
+variable "account_replication_type" {
+  description = "Storage account replication type"
+  type        = string
+  default     = "LRS"
+}
+
+variable "account_kind" {
+  description = "Storage account kind"
+  type        = string
+  default     = "StorageV2"
+}
+
+variable "min_tls_version" {
+  description = "Minimum TLS version"
+  type        = string
+  default     = "TLS1_2"
+}
+
+variable "enable_https_traffic_only" {
+  description = "Enable HTTPS traffic only"
+  type        = bool
+  default     = true
+}
+
+variable "public_network_access_enabled" {
+  description = "Enable public network access"
+  type        = bool
+  default     = true
+}
+
+variable "allow_nested_items_to_be_public" {
+  description = "Allow nested items to be public"
+  type        = bool
+  default     = false
+}
+
+variable "network_rules" {
+  description = "Network rules for storage account"
+  type = object({
+    default_action             = string
+    ip_rules                   = optional(list(string))
+    virtual_network_subnet_ids = optional(list(string))
+    bypass                     = optional(list(string))
+  })
+  default = null
+}
+
+variable "tags" {
+  description = "Tags to apply to resources"
+  type        = map(string)
+}
+variable "sentinel_connectors" {
   type = map(object({
-    name     = string
-    location = string
-  }))
-}
-
-variable "environment_identifier" {
-  type = string
-}
-
-variable "tenant_id" {
-  type = string
-}
-
-variable "subscription_id" {
-  type = string
-}
-
-variable "core_management_subscription_id" {
-  type = string
-}
-
-variable "infrastructure_client_id" {
-  type = string
-}
-
-variable "virtual_networks" {
-  type = map(object({
-    name          = string
-    location      = string
-    address_space = list(string)
-
-    peerings = map(object({
-      name        = string
-      remote_peer = bool
+    workspace_key             = string
+    enable_mimecast           = optional(bool, false)
+    enable_cyberark           = optional(bool, false)
+    mimecast_config           = optional(object({
+      endpoint         = string
+      headers          = map(string)
+      query_parameters = map(string)
     }))
-
-    subnets = map(object({
-      name             = string
-      address_prefixes = list(string)
-      delegation       = optional(list(string))
+    mimecast_polling_interval = optional(string, "PT10M")
+    cyberark_config           = optional(object({
+      endpoint         = string
+      headers          = map(string)
+      query_parameters = map(string)
     }))
-
-    route_tables = map(object({
-      name = string
-
-      routes = map(object({
-        name                   = string
-        address_prefix         = string
-        next_hop_type          = string
-        next_hop_in_ip_address = string
-      }))
-    }))
+    cyberark_polling_interval = optional(string, "PT10M")
   }))
-}
-
-variable "virtual_networks_dns_servers" {
-  type = list(string)
-}
-
-variable "sentinel_workspace" {
-  type = map(object({
-    name     = string
-    location = string
-    sku      = string
-  }))
-}
-
-variable "azure_virtual_desktop" {
-  type = map(object({
-    name                                   = string
-    location                               = string
-    type                                   = string
-    load_balancer_type                     = string
-    maximum_sessions_allowed               = number
-    description                            = string
-    start_vm_on_connect                    = bool
-    domain_name                            = string
-    domain_ou_path                         = string
-    domain_restart                         = bool
-    host_pool_registration_expiration_date = string
-    computer_name                          = string
-    sku                                    = string
-    instances                              = string
-    image_publisher                        = string
-    image_offer                            = string
-    image_sku                              = string
-    image_version                          = string
-    license_type                           = string
-    #virtual_machine_scale_set = map(object({
-    #  name                 = string
-    #  sku                  = string
-    #  instances            = number
-    #  computer_name_prefix = string
-    #  image_publisher      = string
-    #  image_offer          = string
-    #  image_sku            = string
-    #  image_version        = string
-    #  license_type         = string
-    #}))
-    #storage_account = map(object({
-    #  name                     = string
-    #  account_tier             = string
-    #  account_replication_type = string
-    #  account_kind             = string
-    #  storage_share_name       = string
-    #}))
-  }))
+  default = {}
 }

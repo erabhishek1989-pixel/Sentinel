@@ -21,3 +21,4 @@ resource "azurerm_user_assigned_identity" "sentinel_log_analyics_managed_identit
 
   tags = var.tags
 }
+
