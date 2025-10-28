@@ -102,6 +102,7 @@ virtual_networks = {
 
 sentinel_connectors = {
   "log-core-security-sentinel-uksouth-0001" = {
+    storage_account_name = "y3stsentconuks001"
     workspace_key = "log-core-security-sentinel-uksouth-0001"
     connectors = {
       "azuread" = {
