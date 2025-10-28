@@ -189,16 +189,7 @@ module "azure_virtual_desktop" {
   depends_on = [module.virtual_networks]
 }
 
-resource "azurerm_storage_account_network_rules" "network_rules" {
-  count = var.network_rules != null ? 1 : 0
 
-  storage_account_id = azurerm_storage_account.storage_account.id
-  
-  default_action             = var.network_rules.default_action
-  ip_rules                   = try(var.network_rules.ip_rules, [])
-  virtual_network_subnet_ids = try(var.network_rules.virtual_network_subnet_ids, [])
-  bypass                     = try(var.network_rules.bypass, ["AzureServices"])
-}
 
 module "sentinel_connectors" {
   source = "./modules/sentinel_connectors"
