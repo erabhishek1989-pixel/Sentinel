@@ -21,9 +21,26 @@ sentinel_workspace = {
     name     = "log-core-security-sentinel-uksouth-0001"
     location = "UK South"
     sku      = "PerGB2018"
+    connectors = {
+      "mimecast" = {
+        enabled = true
+        app_settings = {
+          "MIMECAST_BASE_URL" = "https://api.mimecast.com"
+          "MIMECAST_APP_ID"   = "your-app-id"
+          # Add other Mimecast-specific settings
+        }
+      }
+      "cyberark" = {
+        enabled = true
+        app_settings = {
+          "CYBERARK_BASE_URL" = "https://your-cyberark.com"
+          "CYBERARK_APP_ID"   = "your-app-id"
+          # Add other CyberArk-specific settings
+        }
+      }
+    }
   }
 }
-
 #azure_virtual_desktop = {
 #  "avd-core-security-uksouth-0001" = {
 #    name                                   = "avd-core-security-uksouth-0001"

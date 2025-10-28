@@ -144,6 +144,7 @@ module "sentinel_workspace" {
   environment_identifier = var.environment_identifier
   resource_group_name    = each.value.location == "UK South" ? module.resource_groups["rg-core-security-uksouth-0001"].resource_group_name : module.resource_groups["rg-core-security-ukwest-0001"].resource_group_name
   tenant_id              = var.tenant_id
+  connectors             = lookup(each.value, "connectors", {})
   tags                   = merge(local.common_tags, local.extra_tags)
 
   depends_on = [module.resource_groups]
@@ -197,12 +198,7 @@ module "sentinel_connectors" {
   for_each                   = var.sentinel_connectors
   environment_identifier     = var.environment_identifier
   log_analytics_workspace_id = module.sentinel_workspace[each.value.workspace_key].log_analytics_workspace_id
-  enable_mimecast            = lookup(each.value, "enable_mimecast", false)
-  mimecast_config            = lookup(each.value, "mimecast_config", null)
-  mimecast_polling_interval  = lookup(each.value, "mimecast_polling_interval", "PT10M")
-  enable_cyberark            = lookup(each.value, "enable_cyberark", false)
-  cyberark_config            = lookup(each.value, "cyberark_config", null)
-  cyberark_polling_interval  = lookup(each.value, "cyberark_polling_interval", "PT10M")
+  connectors                 = each.value.connectors
 
   depends_on = [module.sentinel_workspace]
 }

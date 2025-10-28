@@ -102,17 +102,30 @@ virtual_networks = {
 
 sentinel_connectors = {
   "connectors-uksouth" = {
-    workspace_key               = "log-core-security-sentinel-uksouth-0001"
-    enable_mimecast             = true
-    enable_cyberark             = true
-    mimecast_polling_interval   = "PT10M"
-    cyberark_polling_interval   = "PT10M"
-    # Uncomment and configure:
-    # mimecast_config = { endpoint = "...", headers = {...}, query_parameters = {} }
-    # cyberark_config = { endpoint = "...", headers = {...}, query_parameters = {} }
+    workspace_key = "log-core-security-sentinel-uksouth-0001"
+    connectors = {
+      "mimecast" = {
+        polling_interval = "PT10M"
+        request_config = {
+          method           = "GET"
+          endpoint         = "https://api.mimecast.com/your-endpoint"
+          headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
+          query_parameters = {}
+        }
+      }
+      "cyberark" = {
+        polling_interval = "PT10M"
+        request_config = {
+          method           = "GET"
+          endpoint         = "https://your-cyberark-endpoint.com/api"
+          headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
+          query_parameters = {}
+        }
+      }
+      ##Need to add code to ensure Azure AD is connected
+    }
   }
 }
-
 ### STORAGE ACCOUNTS ###
 
 storage_accounts = {

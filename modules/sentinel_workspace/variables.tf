@@ -58,3 +58,11 @@ variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
 }
+variable "connectors" {
+  description = "Map of connectors to create function apps for"
+  type = map(object({
+    enabled      = bool
+    app_settings = optional(map(string), {})
+  }))
+  default = {}
+}

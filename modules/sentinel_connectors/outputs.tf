@@ -1,7 +1,9 @@
-output "mimecast_connector_id" {
-  value = var.enable_mimecast ? azurerm_sentinel_data_connector_api_polling.mimecast[0].id : null
+output "connector_ids" {
+  description = "Map of connector IDs"
+  value       = { for k, v in azurerm_sentinel_data_connector_api_polling.connector : k => v.id }
 }
 
-output "cyberark_connector_id" {
-  value = var.enable_cyberark ? azurerm_sentinel_data_connector_api_polling.cyberark[0].id : null
+output "connector_names" {
+  description = "Map of connector names"
+  value       = { for k, v in azurerm_sentinel_data_connector_api_polling.connector : k => v.name }
 }
