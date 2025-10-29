@@ -67,3 +67,29 @@ terraform plan -var-file="variables\production.tfvars" -var-file="variables\terr
 # Contribute
 
 To modify the code, create a feature or bugfix branch off the appropriate release branch. Update the variables or code as appropriate and run the Terraform init, validate and plan commands to test the changes against the development environment.
+
+
+#####
+Store secrets in keyvault
+
+# CyberArk API Key
+az keyvault secret set \
+  --vault-name y3-kv-coremgt-uks-0001 \
+  --name "cyberark-api-key" \
+  --value "YOUR_CYBERARK_API_KEY"
+
+# Mimecast Keys 
+az keyvault secret set \
+  --vault-name y3-kv-coremgt-uks-0001 \
+  --name "mimecast-app-key" \
+  --value "YOUR_MIMECAST_APP_KEY"
+
+az keyvault secret set \
+  --vault-name y3-kv-coremgt-uks-0001 \
+  --name "mimecast-access-key" \
+  --value "YOUR_MIMECAST_ACCESS_KEY"
+
+az keyvault secret set \
+  --vault-name y3-kv-coremgt-uks-0001 \
+  --name "mimecast-secret-key" \
+  --value "YOUR_MIMECAST_SECRET_KEY"

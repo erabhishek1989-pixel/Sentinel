@@ -108,7 +108,7 @@ variable "storage_accounts" {
     account_replication_type        = string
     account_kind                    = string
     access_tier                     = string
-    enable_https_traffic_only       = bool
+    https_traffic_only_enabled      = bool
     min_tls_version                 = string
     allow_nested_items_to_be_public = bool
     shared_access_key_enabled       = bool

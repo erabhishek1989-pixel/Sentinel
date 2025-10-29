@@ -16,6 +16,7 @@ variable "connectors" {
       query_parameters = map(string)
     }))
     polling_interval = optional(string, "PT10M")
+    app_settings     = optional(map(string), {})
   }))
   default = {}
 }

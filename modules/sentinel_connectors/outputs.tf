@@ -1,9 +1,7 @@
-output "connector_ids" {
-  description = "Map of connector IDs"
-  value       = { for k, v in azurerm_sentinel_data_connector_api_polling.connector : k => v.id }
-}
-
-output "connector_names" {
-  description = "Map of connector names"
-  value       = { for k, v in azurerm_sentinel_data_connector_api_polling.connector : k => v.name }
+output "connector_summary" {
+  description = "Summary of configured connectors"
+  value = {
+    workspace_id = var.log_analytics_workspace_id
+    connectors   = [for k, v in var.connectors : k]
+  }
 }

@@ -148,7 +148,15 @@ module "sentinel_workspace" {
 
   depends_on = [module.resource_groups]
 }
+resource "azurerm_sentinel_data_connector_azure_active_directory" "aad" {
+  for_each = var.sentinel_workspace
+  
+  name                       = "${var.environment_identifier}-sentinel-aad-connector"
+  log_analytics_workspace_id = module.sentinel_workspace[each.key].log_analytics_workspace_id
+  tenant_id                  = var.tenant_id
 
+  depends_on = [module.sentinel_workspace]
+}
 #--------------- Azure Virtual Desktop ---------------#
 
 
@@ -206,7 +214,7 @@ module "sentinel_connector_storage_accounts" {
   account_replication_type        = "LRS"
   account_kind                    = "StorageV2"
   access_tier                     = "Hot"
-  enable_https_traffic_only       = true
+  https_traffic_only_enabled      = bool
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
   shared_access_key_enabled       = true
@@ -286,7 +294,37 @@ module "sentinel_connector_function_apps" {
   
   depends_on = [module.sentinel_connector_storage_accounts, module.sentinel_workspace]
 }
+# Data source for Key Vault
+data "azurerm_key_vault" "core_mgmt_kv" {
+  name                = "y3-kv-coremgt-uks-0001"
+  resource_group_name = "y3-rg-core-management-uksouth-0001"
+  provider            = azurerm.core-management
+}
 
+# Grant Sentinel Connector Function Apps access to Key Vault
+resource "azurerm_key_vault_access_policy" "sentinel_connector_functions" {
+  for_each = local.sentinel_connector_functions_map
+  
+  key_vault_id = data.azurerm_key_vault.core_mgmt_kv.id
+  tenant_id    = var.tenant_id
+  object_id    = module.sentinel_connector_function_apps[each.key].function_app_identity_principal_id
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
+  
+  depends_on = [module.sentinel_connector_function_apps]
+}
+
+# Grant Azure AD connector Managed Identity access to Microsoft Graph
+resource "azurerm_role_assignment" "azuread_connector_graph_reader" {
+  scope                = "/subscriptions/${var.subscription_id}"
+  role_definition_name = "Directory Readers"  # May need to be done manually in Azure AD
+  principal_id         = module.sentinel_connector_function_apps["log-core-security-sentinel-uksouth-0001-azuread"].function_app_identity_principal_id
+  
+  depends_on = [module.sentinel_connector_function_apps]
+}
 #--------------- Sentinel Data Connectors ---------------#
 
 # Sentinel Data Connectors
@@ -316,7 +354,7 @@ module "storage_accounts" {
   account_replication_type        = each.value.account_replication_type
   account_kind                    = each.value.account_kind
   access_tier                     = each.value.access_tier
-  enable_https_traffic_only       = each.value.enable_https_traffic_only
+  https_traffic_only_enabled      = each.value.https_traffic_only_enabled
   min_tls_version                 = each.value.min_tls_version
   allow_nested_items_to_be_public = each.value.allow_nested_items_to_be_public
   shared_access_key_enabled       = each.value.shared_access_key_enabled

@@ -5,6 +5,13 @@ resource "azurerm_log_analytics_workspace" "log_analytics_workspace" {
   daily_quota_gb      = -1
 
   tags = var.tags
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [
+      tags["LastUpdated"],
+      daily_quota_gb  
+    ]
+  }
 }
 
 resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel_log_analytics_workspace_onboarding" {

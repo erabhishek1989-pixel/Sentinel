@@ -104,33 +104,31 @@ sentinel_connectors = {
   "log-core-security-sentinel-uksouth-0001" = {
     workspace_key = "log-core-security-sentinel-uksouth-0001"
     connectors = {
-      "azuread" = {
-        request_config = {
-          method           = "GET"
-          endpoint         = "https://graph.microsoft.com/v1.0/auditLogs/directoryAudits"
-          headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
-          query_parameters = {}
+      "cyberark" = {
+        app_settings = {
+          # CyberArk SaaS API endpoints
+          "CYBERARK_API_ENDPOINT"      = "https://your-tenant.cyberark.cloud/api/v1"
+          "CYBERARK_API_KEY"           = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/cyberark-api-key/)"
+          "CYBERARK_TENANT_ID"         = "your-cyberark-tenant-id"  # to be updated
+          "LOG_TYPE"                   = "CyberArk_CL"
+          "POLLING_INTERVAL_MINUTES"   = "10"
         }
         polling_interval = "PT10M"
       }
       "mimecast" = {
-        request_config = {
-          method           = "GET"
-          endpoint         = "https://api.mimecast.com/your-endpoint"
-          headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
-          query_parameters = {}
+        app_settings = {
+          # Mimecast SaaS API configuration
+          "MIMECAST_BASE_URL"          = "https://eu-api.mimecast.com"  # to be updated
+          "MIMECAST_APP_ID"            = "your-mimecast-app-id"  # to be updated
+          "MIMECAST_APP_KEY"           = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-app-key/)"
+          "MIMECAST_ACCESS_KEY"        = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-access-key/)"
+          "MIMECAST_SECRET_KEY"        = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-secret-key/)"
+          "LOG_TYPE"                   = "Mimecast_CL"
+          "POLLING_INTERVAL_MINUTES"   = "10"
         }
         polling_interval = "PT10M"
       }
-      "cyberark" = {
-        request_config = {
-          method           = "GET"
-          endpoint         = "https://your-cyberark-endpoint.com/api"
-          headers          = { "Authorization" = "Bearer YOUR_TOKEN" }
-          query_parameters = {}
-        }
-        polling_interval = "PT10M"
-      }
+      
     }
   }
 }
@@ -206,7 +204,7 @@ storage_accounts = {
     access_tier              = "Hot"
     
     # Security Settings
-    enable_https_traffic_only       = true
+    https_traffic_only_enabled      = true
     min_tls_version                 = "TLS1_2"
     allow_nested_items_to_be_public = false
     shared_access_key_enabled       = true
@@ -263,72 +261,24 @@ function_apps = {
   "func-core-security-uksouth" = {
     name                = "core-security-uksouth"
     location            = "UK South"
-    sku_name            = "EP1" # Elastic Premium for VNet integration
+    sku_name            = "Y1"  
     storage_account_key = "st-core-security-uksouth-func"
     python_version      = "3.11"
     
-    # Configuration
     https_only                    = true
-    public_network_access_enabled = false
-    always_on                     = true
+    public_network_access_enabled = true  # Changed - SaaS APIs need public access
+    always_on                     = false  # Consumption plan doesn't support always_on
     
-    # App Settings
     app_settings = {
       "FUNCTIONS_EXTENSION_VERSION" = "~4"
-      "WEBSITE_CONTENTOVERVNET"     = "1"
-      "AzureWebJobsFeatureFlags"    = "EnableWorkerIndexing"
     }
     
-    # Security
     ftps_state          = "Disabled"
     http2_enabled       = true
     minimum_tls_version = "1.2"
     
-    # VNet Integration
-    vnet_route_all_enabled = true
-    # Note: virtual_network_subnet_id will be set dynamically in main.tf using module reference
-    
-    # Managed Identity
-    identity_type = "SystemAssigned"
-    
-    # Private Endpoint
-    enable_private_endpoint = true
-    # Note: private_endpoint_subnet_id will be set dynamically in main.tf using module reference
-  }
-  
-  "func-core-security-ukwest" = {
-    name                = "core-security-ukwest"
-    location            = "UK West"
-    sku_name            = "EP1" # Elastic Premium for VNet integration
-    storage_account_key = "st-core-security-ukwest-func"
-    python_version      = "3.11"
-    
-    # Configuration
-    https_only                    = true
-    public_network_access_enabled = false
-    always_on                     = true
-    
-    # App Settings
-    app_settings = {
-      "FUNCTIONS_EXTENSION_VERSION" = "~4"
-      "WEBSITE_CONTENTOVERVNET"     = "1"
-      "AzureWebJobsFeatureFlags"    = "EnableWorkerIndexing"
-    }
-    
-    # Security
-    ftps_state          = "Disabled"
-    http2_enabled       = true
-    minimum_tls_version = "1.2"
-    
-    # VNet Integration
-    vnet_route_all_enabled = true
-    # Note: virtual_network_subnet_id will be set dynamically in main.tf using module reference
-    
-    # Managed Identity
-    identity_type = "SystemAssigned"
-    
-    # Private Endpoint
-    enable_private_endpoint = true
-    # Note: private_endpoint_subnet_id will be set dynamically in main.tf using module reference
+    vnet_route_all_enabled = false  # Not needed for SaaS
+    identity_type          = "SystemAssigned"
+    enable_private_endpoint = false  # Not needed for SaaS
   }
 }
