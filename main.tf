@@ -237,7 +237,6 @@ module "sentinel_connector_storage_accounts" {
 
 #--------------- Sentinel Connector Function Apps ---------------#
 
-# Flatten the connectors structure for easier iteration
 locals {
   sentinel_connector_functions = flatten([
     for workspace_key, workspace_config in var.sentinel_connectors : [
@@ -316,29 +315,6 @@ resource "azurerm_key_vault_access_policy" "sentinel_connector_functions" {
   
   depends_on = [module.sentinel_connector_function_apps]
 }
-
-# Grant Azure AD connector Managed Identity access to Microsoft Graph
-resource "azurerm_role_assignment" "azuread_connector_graph_reader" {
-  scope                = "/subscriptions/${var.subscription_id}"
-  role_definition_name = "Directory Readers"  # May need to be done manually in Azure AD
-  principal_id         = module.sentinel_connector_function_apps["log-core-security-sentinel-uksouth-0001-azuread"].function_app_identity_principal_id
-  
-  depends_on = [module.sentinel_connector_function_apps]
-}
-#--------------- Sentinel Data Connectors ---------------#
-
-# Sentinel Data Connectors
-module "sentinel_connectors" {
-  source = "./modules/sentinel_connectors"
-
-  for_each                   = var.sentinel_connectors
-  environment_identifier     = var.environment_identifier
-  log_analytics_workspace_id = module.sentinel_workspace[each.value.workspace_key].log_analytics_workspace_id
-  connectors                 = each.value.connectors
-
-  depends_on = [module.sentinel_workspace, module.sentinel_connector_function_apps]
-}
-
 #--------------- Storage Accounts (Original) ---------------#
 
 # Storage Accounts Module

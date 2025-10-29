@@ -115,19 +115,19 @@ sentinel_connectors = {
         }
         polling_interval = "PT10M"
       }
-      "mimecast" = {
-        app_settings = {
-          # Mimecast SaaS API configuration
-          "MIMECAST_BASE_URL"          = "https://eu-api.mimecast.com"  # to be updated
-          "MIMECAST_APP_ID"            = "your-mimecast-app-id"  # to be updated
-          "MIMECAST_APP_KEY"           = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-app-key/)"
-          "MIMECAST_ACCESS_KEY"        = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-access-key/)"
-          "MIMECAST_SECRET_KEY"        = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-secret-key/)"
-          "LOG_TYPE"                   = "Mimecast_CL"
-          "POLLING_INTERVAL_MINUTES"   = "10"
-        }
-        polling_interval = "PT10M"
-      }
+    #  "mimecast" = {
+    #    app_settings = {
+    #      # Mimecast SaaS API configuration
+    #      "MIMECAST_BASE_URL"          = "https://eu-api.mimecast.com"  # to be updated
+    #      "MIMECAST_APP_ID"            = "your-mimecast-app-id"  # to be updated
+    #      "MIMECAST_APP_KEY"           = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-app-key/)"
+    #      "MIMECAST_ACCESS_KEY"        = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-access-key/)"
+    #      "MIMECAST_SECRET_KEY"        = "@Microsoft.KeyVault(SecretUri=https://y3-kv-coremgt-uks-0001.vault.azure.net/secrets/mimecast-secret-key/)"
+    #      "LOG_TYPE"                   = "Mimecast_CL"
+    #      "POLLING_INTERVAL_MINUTES"   = "10"
+    #    }
+    #    polling_interval = "PT10M"
+    #  }
       
     }
   }
